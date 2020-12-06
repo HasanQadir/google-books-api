@@ -35,9 +35,9 @@ public class ServiceGenerator {
 
     public static <S> S createService(Class<S> serviceClass) {
         httpClient.addInterceptor( new HeaderInterceptor());
-        httpClient.readTimeout(2, TimeUnit.MINUTES);
-        httpClient.writeTimeout(2, TimeUnit.MINUTES);
-        httpClient.connectTimeout(2, TimeUnit.MINUTES);
+        httpClient.readTimeout(5, TimeUnit.MINUTES);
+        httpClient.writeTimeout(5, TimeUnit.MINUTES);
+        httpClient.connectTimeout(5, TimeUnit.MINUTES);
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = builder.client(client).build();
         return retrofit.create(serviceClass);

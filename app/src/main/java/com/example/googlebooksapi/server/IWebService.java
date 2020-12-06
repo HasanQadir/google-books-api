@@ -8,5 +8,5 @@ import retrofit2.http.Query;
 
 public interface IWebService {
     @GET("v1/volumes")
-    Call<JsonFeed> getBookVolume(@Query("q") String queryParams);
+    Call<JsonFeed> getBookVolume(@Query("q") String queryParams, @Query("maxResults") String maxResults);
 }

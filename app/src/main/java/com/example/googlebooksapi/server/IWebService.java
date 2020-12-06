@@ -7,5 +7,5 @@ import retrofit2.http.GET;
 
 public interface IWebService {
     @GET("v1/volumes")
-    Call<JsonFeed> getProfile();
+    Call<JsonFeed> getBookVolume();
 }

@@ -15,9 +15,6 @@ public class HeaderInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Application app = BookAPIApplication.application;
-        if (!HelperClass.isConnectedToInternet(app)) {
-            throw new IOException(app.getString(R.string.internet_not_available));
-        }
         okhttp3.Request request = chain.request();
         request = request.newBuilder()
                         .header("Content-Type", "application/json")

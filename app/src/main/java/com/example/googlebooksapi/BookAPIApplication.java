@@ -2,6 +2,8 @@ package com.example.googlebooksapi;
 
 import android.app.Application;
 
+import com.example.googlebooksapi.utils.SharedPreferencesHelper;
+
 public class BookAPIApplication extends Application {
     public static BookAPIApplication application = null;
 
@@ -9,5 +11,7 @@ public class BookAPIApplication extends Application {
     public void onCreate() {
         super.onCreate();
         application = this;
+        SharedPreferencesHelper.init(this);
+
     }
 }

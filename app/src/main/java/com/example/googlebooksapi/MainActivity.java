@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.googlebooksapi.adapters.BookListAdapter;
 import com.example.googlebooksapi.models.Book;
@@ -19,6 +20,8 @@ import com.example.googlebooksapi.models.JsonFeed;
 import com.example.googlebooksapi.server.IWebService;
 import com.example.googlebooksapi.server.ServiceGenerator;
 import com.example.googlebooksapi.utils.Constants;
+import com.example.googlebooksapi.utils.HelperClass;
+import com.example.googlebooksapi.utils.SharedPreferencesHelper;
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
@@ -39,15 +42,25 @@ public class MainActivity extends AppCompatActivity{
         thisActivity = this;
         listView = findViewById(R.id.book_title_list_view);
         fetchData = findViewById(R.id.fetch_books_data);
+
         books = new ArrayList<>();
+
+        if (SharedPreferencesHelper.getBookListData("bookList", "") == null
+                && !HelperClass.isConnectedToInternet(thisActivity)){
+            Toast.makeText(thisActivity, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
+            disableFetchDataButton();
+        } else if (SharedPreferencesHelper.getBookListData("bookList", "") != null){
+            books = SharedPreferencesHelper.getBookListData("bookList", "");
+            makeButtonInvisibleListVisible();
+        }
+
         bookListAdapter = new BookListAdapter(this, books);
         listView.setAdapter(bookListAdapter);
 
         fetchData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fetchData.setClickable(false);
-                fetchData.setBackgroundColor(getResources().getColor(R.color.disabled_bg_color));
+                disableFetchDataButton();
                 getBookVolume(getString(R.string.harry_potter));
             }
         });
@@ -70,12 +83,12 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onResponse(Call<JsonFeed> call, Response<JsonFeed> response) {
                 if (response.isSuccessful()) {
-                    fetchData.setVisibility(View.GONE);
-                    listView.setVisibility(View.VISIBLE);
+                    makeButtonInvisibleListVisible();
                     JsonFeed jsonData = response.body();
                     for (LinkedTreeMap map: jsonData.getItems()){
                         books.add(new Book(map));
                     }
+                    SharedPreferencesHelper.putBookListData("bookList",books);
                     bookListAdapter.notifyDataSetChanged();
                     }
                 }
@@ -84,5 +97,15 @@ public class MainActivity extends AppCompatActivity{
             public void onFailure(Call<JsonFeed> call, Throwable t) {
             }
         });
+    }
+
+    private void makeButtonInvisibleListVisible(){
+        fetchData.setVisibility(View.GONE);
+        listView.setVisibility(View.VISIBLE);
+    }
+
+    private void disableFetchDataButton(){
+        fetchData.setClickable(false);
+        fetchData.setBackgroundColor(getResources().getColor(R.color.disabled_bg_color));
     }
 }

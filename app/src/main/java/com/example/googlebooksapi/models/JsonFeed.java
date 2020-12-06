@@ -1,27 +1,32 @@
 package com.example.googlebooksapi.models;
 
+import com.google.gson.internal.LinkedTreeMap;
+
+import java.util.ArrayList;
+
 public class JsonFeed  {
-    public String name;
-    public Object bookData;
+    private Integer totalItems;
+    private ArrayList<LinkedTreeMap> items;
 
-    public String getName() {
-        return name;
+    public JsonFeed(Integer totalItems, ArrayList<LinkedTreeMap> items) {
+        this.totalItems = totalItems;
+        this.items = items;
     }
 
-    public JsonFeed(String name, Object bookData) {
-        this.name = name;
-        this.bookData = bookData;
+    public Integer getTotalItems() {
+        return totalItems;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTotalItems(Integer totalItems) {
+        this.totalItems = totalItems;
     }
 
-    public Object getBookData() {
-        return bookData;
+    public ArrayList<LinkedTreeMap> getItems() {
+        return items;
     }
 
-    public void setBookData(Object bookData) {
-        this.bookData = bookData;
+    public void setItems(ArrayList<LinkedTreeMap> items) {
+        this.items = items;
     }
+
 }

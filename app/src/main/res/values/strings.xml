@@ -2,6 +2,5 @@
     <string name="app_name">GoogleBooksAPI</string>
     <string name="API_BASE_URL">https://www.googleapis.com/books/</string>
     <string name="VOLUME_AUTHOR">inauthor:</string>
-    <string name="V1">v1/</string>
-    <string name="VOLUMES">volumes</string>
+    <string name="internet_not_available">No internet connection. Close the Application, open Settings and reconnect to a cellular or wifi connection</string>
 </resources>

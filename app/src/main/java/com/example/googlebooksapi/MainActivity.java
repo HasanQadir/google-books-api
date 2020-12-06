@@ -26,25 +26,28 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements APIResponseListener{
 
     ArrayList<Book> books;
     private Activity thisActivity;
     ListView listView;
     Button fetchData;
     private BookListAdapter bookListAdapter;
+    private APIResponseListener apiResponseListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initializing activity member variables and views
+        apiResponseListener = this;
         thisActivity = this;
         listView = findViewById(R.id.book_title_list_view);
         fetchData = findViewById(R.id.fetch_books_data);
-
         books = new ArrayList<>();
 
+        // Checking Internet Connection and showing results accordingly
         if (SharedPreferencesHelper.getBookListData("bookList", "") == null
                 && !HelperClass.isConnectedToInternet(thisActivity)){
             Toast.makeText(thisActivity, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
@@ -54,9 +57,11 @@ public class MainActivity extends AppCompatActivity{
             makeButtonInvisibleListVisible();
         }
 
+        // Initialize bookListAdapter and set it to ListView
         bookListAdapter = new BookListAdapter(this, books);
         listView.setAdapter(bookListAdapter);
 
+        // Attach & handle onClickListeners events
         fetchData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,6 +81,7 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
+    // Get BookVolumes and show it in ListView
     private void getBookVolume(String bookTitle){
         IWebService service = ServiceGenerator.getService(IWebService.class);
         final Call<JsonFeed> bookVolume = service.getBookVolume(bookTitle, Constants.MAX_RESULTS);
@@ -85,16 +91,13 @@ public class MainActivity extends AppCompatActivity{
                 if (response.isSuccessful()) {
                     makeButtonInvisibleListVisible();
                     JsonFeed jsonData = response.body();
-                    for (LinkedTreeMap map: jsonData.getItems()){
-                        books.add(new Book(map));
-                    }
-                    SharedPreferencesHelper.putBookListData("bookList",books);
-                    bookListAdapter.notifyDataSetChanged();
+                    apiResponseListener.onAPISuccessfulResponse(jsonData);
                     }
                 }
 
             @Override
             public void onFailure(Call<JsonFeed> call, Throwable t) {
+                apiResponseListener.onAPIFailureResponse(t.getMessage());
             }
         });
     }
@@ -107,5 +110,31 @@ public class MainActivity extends AppCompatActivity{
     private void disableFetchDataButton(){
         fetchData.setClickable(false);
         fetchData.setBackgroundColor(getResources().getColor(R.color.disabled_bg_color));
+    }
+
+    private void safeBookListInSharedPreferences(){
+        SharedPreferencesHelper.putBookListData("bookList",books);
+    }
+
+    private void addItemsInBookList(JsonFeed jsonFeed){
+        for (LinkedTreeMap map: jsonFeed.getItems()){
+            books.add(new Book(map));
+        }
+    }
+
+    private void updateBookList(){
+        bookListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onAPISuccessfulResponse(JsonFeed jsonFeed) {
+        addItemsInBookList(jsonFeed);
+        safeBookListInSharedPreferences();
+        updateBookList();
+    }
+
+    @Override
+    public void onAPIFailureResponse(String message) {
+        Toast.makeText(thisActivity, message, Toast.LENGTH_SHORT).show();
     }
 }

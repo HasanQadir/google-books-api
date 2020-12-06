@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity{
         fetchData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                fetchData.setClickable(false);
+                fetchData.setBackgroundColor(getResources().getColor(R.color.disabled_bg_color));
                 getBookVolume(getString(R.string.harry_potter));
             }
         });

@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.googlebooksapi.R;
+import com.example.googlebooksapi.adapters.MyBookRecyclerViewAdapter;
 import com.example.googlebooksapi.interfaces.BookListOnItemClickListener;
 import com.example.googlebooksapi.interfaces.BookSelectedListener;
 import com.example.googlebooksapi.models.Book;

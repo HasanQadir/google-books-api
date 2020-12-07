@@ -10,6 +10,11 @@ public class Book implements Parcelable {
     private String title;
     private String description;
 
+    public Book(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     public Book(LinkedTreeMap map){
         map = (LinkedTreeMap) map.get("volumeInfo");
         this.title = (String) map.get("title");

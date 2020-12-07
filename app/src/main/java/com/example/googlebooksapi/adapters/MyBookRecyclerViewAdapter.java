@@ -1,4 +1,4 @@
-package com.example.googlebooksapi.fragments;
+package com.example.googlebooksapi.adapters;
 
 import androidx.recyclerview.widget.RecyclerView;
 

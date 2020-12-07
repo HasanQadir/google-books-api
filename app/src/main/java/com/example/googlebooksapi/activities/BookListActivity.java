@@ -20,11 +20,10 @@ import java.util.ArrayList;
 
 import static com.example.googlebooksapi.utils.Constants.BOOK_DES_FRAG_TAG;
 
-public class BookListActivity extends AppCompatActivity implements FetchDataOnSuccessListener, BookSelectedListener {
+public class BookListActivity extends AppCompatActivity implements BookSelectedListener {
 
     ArrayList<Book> books;
     BookListFragment bookListFragment;
-    FetchJsonFragment fetchJsonFragment;
     BookDescriptionFragment bookDescriptionFragment;
 
     @Override
@@ -34,17 +33,7 @@ public class BookListActivity extends AppCompatActivity implements FetchDataOnSu
 
         // Initializing activity member variables and views
         books = new ArrayList<>();
-
-        // Checking Internet Connection and showing results accordingly
-        if (SharedPreferencesHelper.getBookListData("bookList", "") == null
-                && !HelperClass.isConnectedToInternet(this)){
-            Toast.makeText(this, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-            finish();
-        } else if (SharedPreferencesHelper.getBookListData("bookList", "") != null){
-            showBookListFragment();
-        } else {
-            showFetchJsonFragment();
-        }
+        showBookListFragment();
     }
 
     private void showBookListFragment(){
@@ -55,24 +44,12 @@ public class BookListActivity extends AppCompatActivity implements FetchDataOnSu
         ft.commit();
     }
 
-    private void showFetchJsonFragment(){
-        fetchJsonFragment = FetchJsonFragment.newInstance();
-        fetchJsonFragment.setFetchDataOnSuccessListener(this);
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.frame_layout, fetchJsonFragment);
-        ft.commit();
-    }
-
     private void showBookDescriptionFragment(Book book){
         bookDescriptionFragment = BookDescriptionFragment.newInstance(book);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.frame_layout, bookDescriptionFragment);
         ft.addToBackStack(BOOK_DES_FRAG_TAG);
         ft.commit();
-    }
-    @Override
-    public void onSuccessfulResponse() {
-        showBookListFragment();
     }
 
     @Override

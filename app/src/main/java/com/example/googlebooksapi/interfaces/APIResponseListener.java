@@ -1,4 +1,4 @@
-package com.example.googlebooksapi;
+package com.example.googlebooksapi.interfaces;
 
 import com.example.googlebooksapi.models.JsonFeed;
 

@@ -1,66 +1,67 @@
-package com.example.googlebooksapi;
+package com.example.googlebooksapi.fragments;
 
-import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.googlebooksapi.adapters.BookListAdapter;
+import com.example.googlebooksapi.R;
 import com.example.googlebooksapi.interfaces.APIResponseListener;
+import com.example.googlebooksapi.interfaces.FetchDataOnSuccessListener;
 import com.example.googlebooksapi.models.Book;
 import com.example.googlebooksapi.models.JsonFeed;
 import com.example.googlebooksapi.server.IWebService;
 import com.example.googlebooksapi.server.ServiceGenerator;
 import com.example.googlebooksapi.utils.Constants;
-import com.example.googlebooksapi.utils.HelperClass;
 import com.example.googlebooksapi.utils.SharedPreferencesHelper;
 import com.google.gson.internal.LinkedTreeMap;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements APIResponseListener {
 
-    ArrayList<Book> books;
-    private Activity thisActivity;
-    ListView listView;
+public class FetchJsonFragment extends Fragment implements APIResponseListener {
+
     Button fetchData;
-    private BookListAdapter bookListAdapter;
+    ArrayList<Book> books;
     private APIResponseListener apiResponseListener;
+    private FetchDataOnSuccessListener fetchDataOnSuccessListener;
+
+    public FetchJsonFragment() {
+        // Required empty public constructor
+    }
+
+    public static FetchJsonFragment newInstance() {
+        FetchJsonFragment fragment = new FetchJsonFragment();
+        Bundle args = new Bundle();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // Initializing activity member variables and views
-        apiResponseListener = this;
-        thisActivity = this;
-        listView = findViewById(R.id.book_title_list_view);
-        fetchData = findViewById(R.id.fetch_books_data);
         books = new ArrayList<>();
+        apiResponseListener = this;
+    }
 
-        // Checking Internet Connection and showing results accordingly
-        if (SharedPreferencesHelper.getBookListData("bookList", "") == null
-                && !HelperClass.isConnectedToInternet(thisActivity)){
-            Toast.makeText(thisActivity, getString(R.string.internet_not_available), Toast.LENGTH_LONG).show();
-            disableFetchDataButton();
-        } else if (SharedPreferencesHelper.getBookListData("bookList", "") != null){
-            books = SharedPreferencesHelper.getBookListData("bookList", "");
-            makeButtonInvisibleListVisible();
-        }
+    public void setFetchDataOnSuccessListener(FetchDataOnSuccessListener listener){
+        this.fetchDataOnSuccessListener = listener;
+    }
 
-        // Initialize bookListAdapter and set it to ListView
-        bookListAdapter = new BookListAdapter(this, books);
-        listView.setAdapter(bookListAdapter);
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view =  inflater.inflate(R.layout.fragment_fetch_json, container, false);
+        fetchData = (Button) view.findViewById(R.id.fetch_books_data);
 
         // Attach & handle onClickListeners events
         fetchData.setOnClickListener(new View.OnClickListener() {
@@ -71,15 +72,7 @@ public class MainActivity extends AppCompatActivity implements APIResponseListen
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Book book = (Book) listView.getItemAtPosition(position);
-                Intent intent = new Intent(thisActivity, BookDescription.class);
-                intent.putExtra("book", book);
-                startActivity(intent);
-            }
-        });
+        return view;
     }
 
     // Get BookVolumes and show it in ListView
@@ -90,11 +83,10 @@ public class MainActivity extends AppCompatActivity implements APIResponseListen
             @Override
             public void onResponse(Call<JsonFeed> call, Response<JsonFeed> response) {
                 if (response.isSuccessful()) {
-                    makeButtonInvisibleListVisible();
                     JsonFeed jsonData = response.body();
                     apiResponseListener.onAPISuccessfulResponse(jsonData);
-                    }
                 }
+            }
 
             @Override
             public void onFailure(Call<JsonFeed> call, Throwable t) {
@@ -103,9 +95,8 @@ public class MainActivity extends AppCompatActivity implements APIResponseListen
         });
     }
 
-    private void makeButtonInvisibleListVisible(){
+    private void makeButtonInvisible(){
         fetchData.setVisibility(View.GONE);
-        listView.setVisibility(View.VISIBLE);
     }
 
     private void disableFetchDataButton(){
@@ -114,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements APIResponseListen
     }
 
     private void safeBookListInSharedPreferences(){
-        SharedPreferencesHelper.putBookListData("bookList",books);
+        SharedPreferencesHelper.putBookListData("bookList", books);
     }
 
     private void addItemsInBookList(JsonFeed jsonFeed){
@@ -123,19 +114,16 @@ public class MainActivity extends AppCompatActivity implements APIResponseListen
         }
     }
 
-    private void updateBookList(){
-        bookListAdapter.notifyDataSetChanged();
-    }
-
     @Override
     public void onAPISuccessfulResponse(JsonFeed jsonFeed) {
+        makeButtonInvisible();
         addItemsInBookList(jsonFeed);
         safeBookListInSharedPreferences();
-        updateBookList();
+        fetchDataOnSuccessListener.onSuccessfulResponse();
     }
 
     @Override
     public void onAPIFailureResponse(String message) {
-        Toast.makeText(thisActivity, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 }
